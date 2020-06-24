@@ -1,0 +1,91 @@
+/// important sql Q
+
+
+
+
+//// add FOREIGN key
+ALTER TABLE groups ADD FOREIGN KEY (project_id) REFERENCES projects(project_id)
+
+
+//// two table inner join
+SELECT * FROM projects INNER JOIN groups ON projects.project_id = groups.project_id
+
+
+
+//// three table inner join
+SELECT user.user_name, groups.group_name
+FROM ((group_members
+INNER JOIN user ON group_members.user_id = user.id)
+INNER JOIN groups ON group_members.group_id = groups.id);
+
+//// three table inner join (fetch groups chat)
+SELECT groups.group_name,user.user_name,chats.chat FROM ((chats INNER JOIN groups ON chats.group_id = groups.id) INNER JOIN user ON chats.user_id = user.id)
+
+
+//// three table inner join with where clause ( fetch groups chat by group_name )
+
+SELECT groups.group_name,user.user_name,chats.chat FROM 
+((chats INNER JOIN groups ON chats.group_id = groups.id) 
+INNER JOIN user ON chats.user_id = user.id) 
+WHERE groups.group_name='python group'
+
+
+//// three table inner join with where clause ( fetch groups chat by user_name )
+
+ SELECT groups.group_name,user.user_name,chats.chat FROM ((chats INNER JOIN groups ON chats.group_id = groups.id) INNER JOIN user ON chats.user_id = user.id)
+ WHERE user.user_name='dad'
+
+
+//// three table inner join with where clause ( fetch USER.NAME who is in a group  FORM group_members )
+
+
+ SELECT user.user_name, groups.group_name FROM ((group_members INNER JOIN user ON group_members.user_id = user.id) INNER JOIN groups ON group_members.group_id = groups.id)
+ WHERE groups.group_name='python group'
+
+ //// collect user.user_name, groups.group_name, projects.project_name info
+
+ SELECT user.user_name, groups.group_name, projects.project_name FROM 
+ (((group_members INNER JOIN user ON group_members.user_id = user.id)
+  INNER JOIN groups ON group_members.group_id = groups.id) 
+  INNER JOIN projects ON projects.project_id = groups.project_id) WHERE user.id='1'
+
+//// insert values 
+
+INSERT INTO projects VALUES
+(NULL, 'lock_mail', 'programming', 'imgG url', 'name of img', 'public', 'its a sample of double insert','1');
+SELECT @last := LAST_INSERT_ID();
+INSERT INTO groups VALUES (NULL, @last, 'joko group', 'joko image url', 'joko image', '2020-05-05','u121','111','1');
+
+//Projects details by group_id
+SELECT 
+groups.group_name,
+projects.project_name,projects.project_type,
+project_files.file_name,project_files.file_loc 
+FROM 
+((groups INNER JOIN projects ON groups.project_id = projects.project_id) 
+INNER JOIN project_files ON projects.project_file_id = project_files.id) WHERE groups.id=11
+
+//join members details by id
+
+SELECT user.user_name, groups.group_name FROM 
+((group_members INNER JOIN user ON group_members.user_id = user.id)
+ INNER JOIN groups ON group_members.group_id = groups.id) WHERE groups.id=11
+
+ //users details who join this.id groups 
+
+ SELECT user.id, user.user_name, user.user_mail, user.user_gender FROM 
+ ((group_members INNER JOIN user ON group_members.user_id = user.id) 
+ INNER JOIN groups ON group_members.group_id = groups.id) WHERE groups.id=11
+
+
+// fetch projects details using admin id 
+
+SELECT groups.group_name,groups.group_img,groups.group_img_name,groups.group_create_date,
+projects.project_name, projects.project_type,projects.project_privacy,projects.project_description 
+FROM (groups INNER JOIN projects ON projects.project_id = groups.project_id) WHERE projects.project_user_admin_id=3
+
+or u cna use this sql ==>>>>
+SELECT groups.group_name,groups.group_img,groups.group_img_name,groups.group_create_date, projects.project_name, projects.project_type,projects.project_privacy,projects.project_description,project_files.file_name,project_files.file_loc FROM ((groups INNER JOIN projects ON projects.project_id = groups.project_id) INNER JOIN project_files ON projects.project_file_id = project_files.id) WHERE projects.project_user_admin_id=4
+
+// fetch details to update the projects details 
+SELECT groups.group_name, projects.project_name,projects.project_type, project_files.file_name,project_files.file_loc FROM ((groups INNER JOIN projects ON groups.project_id = projects.project_id) INNER JOIN project_files ON projects.project_file_id = project_files.id) WHERE groups.id=31 AND projects.project_user_admin_id=4
